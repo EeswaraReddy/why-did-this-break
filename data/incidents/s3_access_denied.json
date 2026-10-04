@@ -1,0 +1,55 @@
+{
+  "incident_id": "INC-001",
+  "title": "Production application cannot write to S3",
+  "service": "order-service",
+  "environment": "production",
+  "timestamp": "2026-10-02T14:32:00Z",
+
+  "symptoms": [
+    "Order processing started failing",
+    "Application receives HTTP 403 from S3",
+    "Failures started approximately 10 minutes after deployment"
+  ],
+
+  "logs": [
+    "ERROR order-service: PutObject failed",
+    "ERROR S3 response: AccessDenied",
+    "ERROR bucket=company-orders-prod key=orders/12345.json"
+  ],
+
+  "metrics": [
+    "order_processing_errors increased from 0.2% to 38%",
+    "application CPU normal",
+    "application memory normal",
+    "network latency normal"
+  ],
+
+  "recent_changes": [
+    {
+      "change": "Deployment order-service v2.8.0",
+      "time": "2026-10-02T14:20:00Z"
+    },
+    {
+      "change": "IAM Terraform module modified",
+      "time": "2026-10-02T14:18:00Z",
+      "details": "s3:PutObject permission changed"
+    }
+  ],
+
+  "infrastructure": {
+    "application_role": "arn:aws:iam::123456789012:role/order-service-prod",
+    "bucket": "company-orders-prod",
+    "expected_permission": "s3:PutObject",
+    "observed_permission": "s3:GetObject"
+  },
+
+  "runbook": [
+    "Check application logs",
+    "Check recent deployments",
+    "Check IAM permissions",
+    "Check CloudTrail for denied API calls",
+    "Verify the IAM change before remediation"
+  ],
+
+  "expected_root_cause": "The production IAM role lost s3:PutObject permission during a recent Terraform change."
+}
